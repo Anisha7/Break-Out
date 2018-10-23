@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <!-- renders game -->
+    <canvas id="myCanvas" width="480" height="320"></canvas>
+
+    <!-- controls game -->
+    <script>
+        // reference to canvas
+        var canvas = document.getElementById("myCanvas");
+        // 2D rendering context, to paint to canvas
+        var ctx = canvas.getContext("2d");
+        
+        // draw a filled red rectangle
+        ctx.beginPath();
+        // x, y, width, height
+        ctx.rect(20, 40, 50, 50);
+        // color used by fill()
+        ctx.fillStyle = "#FF0000";
+        ctx.fill();
+        ctx.closePath();
+        
+        // draw a filled green circle
+        ctx.beginPath();
+        // center x, center y, radius, start angle, end angle, [optional] direction (false = clockwise, true = anti-clockwise)
+        ctx.arc(240, 160, 20, 0, Math.PI*2, false);
+        ctx.fillStyle = "green";
+        ctx.fill();
+        ctx.closePath();
+        
+        // draw an empty rectangle with border
+        ctx.beginPath();
+        ctx.rect(160, 10, 100, 40);
+        // stroke allows the border. Leaving fill out gets us the empty rectangle.
+        ctx.strokeStyle = "rgba(0, 0, 255, 0.5)";
+        ctx.stroke();
+        ctx.closePath();
+
+    </script>
+
+</body>
+</html>
