@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <!-- renders game -->
+    <canvas id="myCanvas" width="480" height="320"></canvas>
+
+    <!-- controls game -->
+    <script>
+        // reference to canvas
+        var canvas = document.getElementById("myCanvas");
+        // 2D rendering context, to paint to canvas
+        var ctx = canvas.getContext("2d");
+        ctx.canvas.width  = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+
+        // helpers
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+        }
+        
+        // defining a drawing loop
+        // loop functions over using JavaScript timing functions : setInterval() or requestAnimationFrame()
+        
+        // ball variables
+        // center position for ball
+        var x = canvas.width/2;
+        var y = canvas.height-30;
+        // change difference for position
+        var dx = 2;
+        var dy = -2;
+        // radius 
+        var ballRadius = 20;
+        // color
+        var ballColor = "#0095DD";
+
+        // paddle variables
+        var paddleHeight = 20;
+        var paddleWidth = 75;
+        var paddleX = (canvas.width-paddleWidth)/2;
+
+        // user controls
+        var rightPressed = false;
+        var leftPressed = false;
+
+        // ball function
+        function drawBall() {
+            // draw the ball
+            ctx.beginPath();
+            ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+            ctx.fillStyle = ballColor;
+            ctx.fill();
+            ctx.closePath();
+        }
+        
+        // paddle function
+        function drawPaddle() {
+            ctx.beginPath();
+            ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function changeColor() {
+            // change color
+            ballColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+        }
+
+        // user functions
+        function keyDownHandler(e) {
+            if(e.keyCode == 39) {
+                rightPressed = true;
+            }
+            else if(e.keyCode == 37) {
+                leftPressed = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if(e.keyCode == 39) {
+                rightPressed = false;
+            }
+            else if(e.keyCode == 37) {
+                leftPressed = false;
+            }
+        }
+
+        function draw() {
+            // clears the canvas before each draw to remove trail
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // draw the ball
+            drawBall();
+            // draw the paddle
+            drawPaddle();
+            // update position
+            x += dx;
+            y += dy;
+            
+            // change direction if ball hits the wall
+            // subtracting radius to make sure it doesn't partially sink in the wall
+            if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+                dx = -dx;
+            }
+            if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+                dy = -dy;
+            }
+
+            // paddle controls
+            if(rightPressed && paddleX < canvas.width-paddleWidth) {
+                paddleX += 7;
+            }
+            else if(leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
+            
+        }
+        // adding listeners to call user functions when user interacts
+        document.addEventListener("keydown", keyDownHandler, false);
+        document.addEventListener("keyup", keyUpHandler, false);
+        // will execute draw every 10 milliseconds
+        setInterval(draw, 10);
+        // will execute color change every 1000 milliseconds
+        setInterval(changeColor, 1000);
+
+    </script>
+
+</body>
+</html>
