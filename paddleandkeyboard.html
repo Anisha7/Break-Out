@@ -53,6 +53,27 @@
         var rightPressed = false;
         var leftPressed = false;
 
+        // brick variables
+        var brickRowCount = 8;
+        var brickColumnCount = 17;
+        var brickWidth = 75;
+        var brickHeight = 20;
+        var brickPadding = 10;
+        var brickOffsetTop = 30;
+        var brickOffsetLeft = 30;
+
+        // creating the brick grid
+        var bricks = [];
+        for(var c=0; c<brickColumnCount; c++) {
+            bricks[c] = [];
+            for(var r=0; r<brickRowCount; r++) {
+                bricks[c][r] = { x: 0, y: 0, status: 1 };
+            }
+        }
+
+        // scoring
+        var score = 0;
+
         // ball function
         function drawBall() {
             // draw the ball
@@ -70,6 +91,25 @@
             ctx.fillStyle = "#0095DD";
             ctx.fill();
             ctx.closePath();
+        }
+
+        // draw bricks
+        function drawBricks() {
+            for(var c=0; c<brickColumnCount; c++) {
+                for(var r=0; r<brickRowCount; r++) {
+                    if(bricks[c][r].status == 1) {
+                        var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+                        var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+                        bricks[c][r].x = brickX;
+                        bricks[c][r].y = brickY;
+                        ctx.beginPath();
+                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                        ctx.fillStyle = "#0095DD";
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                }
+            }
         }
 
         function changeColor() {
@@ -96,13 +136,46 @@
             }
         }
 
+        function collisionDetection() {
+            for(var c=0; c<brickColumnCount; c++) {
+                for(var r=0; r<brickRowCount; r++) {
+                    var b = bricks[c][r];
+                    if(b.status == 1) {
+                        if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                            dy = -dy;
+                            b.status = 0;
+                            score++;
+                            // if all bricks are destroyed
+                            if(score == brickRowCount*brickColumnCount) {
+                                alert("YOU WIN, CONGRATULATIONS!");
+                                document.location.reload();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#0095DD";
+            ctx.fillText("Score: "+score, 8, 20);
+        }
+        
+
         function draw() {
             // clears the canvas before each draw to remove trail
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             // draw the ball
             drawBall();
+            // draw bricks
+            drawBricks();
             // draw the paddle
             drawPaddle();
+            // scoring
+            drawScore();
+            // paddle-brick collisions
+            collisionDetection();
             // update position
             x += dx;
             y += dy;
@@ -112,8 +185,18 @@
             if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
                 dx = -dx;
             }
-            if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
+            // trigger game over if bottom wall is hit
+            if(y + dy < ballRadius) {
                 dy = -dy;
+            } else if(y + dy > canvas.height-ballRadius) {
+                // check for paddle collision
+                if(x > paddleX && x < paddleX + paddleWidth) {
+                    dy = -dy;
+                }
+                else {
+                    alert("GAME OVER");
+                    document.location.reload();
+                }
             }
 
             // paddle controls

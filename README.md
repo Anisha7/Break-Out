@@ -16,3 +16,5 @@
 ### PADDLE AND KEYBOARD
     - Add a paddle
     - Allow users to move that with left/right arrow key presses
+    - Add bricks
+    - Collision with bricks
