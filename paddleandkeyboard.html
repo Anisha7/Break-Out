@@ -64,10 +64,12 @@
 
         // creating the brick grid
         var bricks = [];
+        let brickColor = "#0095DD"
         for(var c=0; c<brickColumnCount; c++) {
             bricks[c] = [];
             for(var r=0; r<brickRowCount; r++) {
-                bricks[c][r] = { x: 0, y: 0, status: 1 };
+                bricks[c][r] = { x: 0, y: 0, status: 1 , brickColor};
+                brickColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
             }
         }
 
@@ -95,6 +97,7 @@
 
         // draw bricks
         function drawBricks() {
+            
             for(var c=0; c<brickColumnCount; c++) {
                 for(var r=0; r<brickRowCount; r++) {
                     if(bricks[c][r].status == 1) {
@@ -104,9 +107,10 @@
                         bricks[c][r].y = brickY;
                         ctx.beginPath();
                         ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        ctx.fillStyle = "#0095DD";
+                        ctx.fillStyle = bricks[c][r].brickColor;
                         ctx.fill();
                         ctx.closePath();
+                        
                     }
                 }
             }
@@ -133,6 +137,13 @@
             }
             else if(e.keyCode == 37) {
                 leftPressed = false;
+            }
+        }
+
+        function mouseMoveHandler(e) {
+            var relativeX = e.clientX - canvas.offsetLeft;
+            if(relativeX > 0 && relativeX < canvas.width) {
+                paddleX = relativeX - paddleWidth/2;
             }
         }
 
@@ -211,6 +222,7 @@
         // adding listeners to call user functions when user interacts
         document.addEventListener("keydown", keyDownHandler, false);
         document.addEventListener("keyup", keyUpHandler, false);
+        document.addEventListener("mousemove", mouseMoveHandler, false);
         // will execute draw every 10 milliseconds
         setInterval(draw, 10);
         // will execute color change every 1000 milliseconds
