@@ -5,7 +5,7 @@
     <title>Gamedev Canvas Workshop</title>
     <style>
     	* { padding: 0; margin: 0; }
-    	canvas { background: #eee; display: block; margin: 0 auto; }
+    	canvas { background: black; display: block; margin: 0 auto;}
     </style>
 </head>
 <body>
@@ -46,7 +46,7 @@
 
         // paddle variables
         var paddleHeight = 20;
-        var paddleWidth = 150;
+        var paddleWidth = 100;
         var paddleX = (canvas.width-paddleWidth)/2;
 
         // user controls
@@ -55,21 +55,25 @@
 
         // brick variables
         var brickRowCount = 8;
-        var brickColumnCount = 17;
-        var brickWidth = 75;
-        var brickHeight = 20;
-        var brickPadding = 10;
-        var brickOffsetTop = 30;
+        var brickColumnCount = 15;
+        var brickWidth = 85;
+        var brickHeight = 40;
+        var brickPadding = 15;
+        var brickOffsetTop = 80;
         var brickOffsetLeft = 30;
+
 
         // creating the brick grid
         var bricks = [];
-        let brickColor = "#0095DD"
-        for(var c=0; c<brickColumnCount; c++) {
+        let hue = getRandomInt(0, 360)
+        let brickColor = `hsl(${hue}, 100%, 50%)`
+        for(let c=0; c<brickColumnCount; c++) {
             bricks[c] = [];
-            for(var r=0; r<brickRowCount; r++) {
+            for(let r=0; r<brickRowCount; r++) {
                 bricks[c][r] = { x: 0, y: 0, status: 1 , brickColor};
-                brickColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+                //brickColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+                let hue = getRandomInt(0, 360)
+                brickColor = `hsl(${hue}, 100%, 50%)`
             }
         }
 
@@ -77,12 +81,31 @@
         var score = 0;
         var lives = 3;
 
+        // speed
+        var speed = 7;
+
+        
+
         // ball function
         function drawBall() {
             // draw the ball
             ctx.beginPath();
             ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-            ctx.fillStyle = ballColor;
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        // second ball (enemy)
+        var x_e = 40;
+        var y_e = 40;
+        var dx_e = 2;
+        var dy_e = -2;
+        function drawBall2() {
+            // draw the ball
+            ctx.beginPath();
+            ctx.arc(x_e, y_e, ballRadius, 0, Math.PI*2);
+            ctx.fillStyle = "red";
             ctx.fill();
             ctx.closePath();
         }
@@ -91,7 +114,7 @@
         function drawPaddle() {
             ctx.beginPath();
             ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-            ctx.fillStyle = "#0095DD";
+            ctx.fillStyle = "white";
             ctx.fill();
             ctx.closePath();
         }
@@ -100,9 +123,11 @@
         function drawBricks() {
             
             for(var c=0; c<brickColumnCount; c++) {
+                let off = 0;
                 for(var r=0; r<brickRowCount; r++) {
+                    
                     if(bricks[c][r].status == 1) {
-                        var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft;
+                        var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft + off;
                         var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
                         bricks[c][r].x = brickX;
                         bricks[c][r].y = brickY;
@@ -113,13 +138,21 @@
                         ctx.closePath();
                         
                     }
+                    if (r%2 == 0) {
+                        off += 60;
+                    } else {
+                        off -= 60;
+                    }    
                 }
+                
             }
         }
 
         function changeColor() {
             // change color
-            ballColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+            //ballColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+            let hue = getRandomInt(0, 360)
+            ballColor = `hsl(${hue}, 100%, 50%)`
         }
 
         // user functions
@@ -169,18 +202,23 @@
         }
 
         function drawScore() {
-            ctx.font = "16px Arial";
-            ctx.fillStyle = "#0095DD";
-            ctx.fillText("Score: "+score, 8, 20);
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("Score: "+score, 90, 50);
         }
 
         function drawLives() {
-            ctx.font = "16px Arial";
-            ctx.fillStyle = "#0095DD";
-            ctx.fillText("Lives: "+lives, canvas.width-65, 20);
+            ctx.font = "30px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("Lives: "+lives, canvas.width-205, 50);
+        }
+
+        function drawInstructions() {
+            ctx.font = "20px Arial";
+            ctx.fillStyle = "white";
+            ctx.fillText("The red ball can take away your life.", canvas.width/2 -120, 50);
         }
         
-
         function draw() {
             // clears the canvas before each draw to remove trail
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -190,10 +228,13 @@
             drawBricks();
             // draw the paddle
             drawPaddle();
+            // draw enemy ball
+            drawBall2();
             // scoring
             drawScore();
             // lives
             drawLives();
+            drawInstructions()
             // paddle-brick collisions
             collisionDetection();
             // update position
@@ -220,6 +261,7 @@
                         document.location.reload();
                     }
                     else {
+                        alert("YOU LOST ONE LIFE")
                         x = canvas.width/2;
                         y = canvas.height-30;
                         dx = 2;
@@ -227,6 +269,42 @@
                         paddleX = (canvas.width-paddleWidth)/2;
                     }
                 }
+            }
+            
+            // enemy ball
+            x_e += dx_e;
+            y_e += dy_e;
+
+            if(x_e + dx > canvas.width-ballRadius || x_e + dx < ballRadius) {
+                dx_e = -dx_e;
+            }
+            if(y_e + dy > canvas.height-ballRadius || y_e + dy < ballRadius) {
+                dy_e = -dy_e;
+            }
+
+            // check collision between enemy ball and player ball
+            if (x_e >= x-ballRadius && x_e <= x+ballRadius) {
+                if (y_e >= y-ballRadius && y_e <= y+ballRadius) {
+                    lives--;
+                    if(!lives) {
+                        alert("GAME OVER");
+                        document.location.reload();
+                    }
+                    else {
+                        x = canvas.width/2;
+                        y = canvas.height-30;
+                        dx = 2;
+                        dy = -2;
+                        paddleX = (canvas.width-paddleWidth)/2;
+                    }
+                }
+            }
+
+            // check for paddle collision
+            if(y_e + dy_e > canvas.height-ballRadius) {
+                if(x_e > paddleX && x_e < paddleX + paddleWidth) {
+                        dy_e = -dy_e;
+                    }
             }
 
             // paddle controls
@@ -237,13 +315,22 @@
                 paddleX -= 7;
             }
             
+            if (score > 30) {
+                speed = 5;
+                paddleWidth = 80;
+            }
+
+            if (score > 60) {
+                speed = 3;
+                paddleWidth = 60;
+            }
         }
         // adding listeners to call user functions when user interacts
         document.addEventListener("keydown", keyDownHandler, false);
         document.addEventListener("keyup", keyUpHandler, false);
         document.addEventListener("mousemove", mouseMoveHandler, false);
         // will execute draw every 10 milliseconds
-        setInterval(draw, 10);
+        setInterval(draw, speed);
         // will execute color change every 1000 milliseconds
         setInterval(changeColor, 1000);
 
