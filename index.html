@@ -37,8 +37,8 @@
         var x = canvas.width/2;
         var y = canvas.height-30;
         // change difference for position
-        var dx = 2;
-        var dy = -2;
+        var dx = 10;
+        var dy = -10;
         // radius 
         var ballRadius = 20;
         // color
@@ -316,13 +316,15 @@
             }
             
             if (score > 30) {
-                speed = 5;
                 paddleWidth = 80;
+                dx = 30;
+                dy = 30;
             }
 
             if (score > 60) {
-                speed = 3;
                 paddleWidth = 60;
+                dx = 50;
+                dy = 50;
             }
         }
         // adding listeners to call user functions when user interacts
