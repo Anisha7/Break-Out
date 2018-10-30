@@ -84,7 +84,19 @@
         // speed
         var speed = 7;
 
-        
+        // draw background function
+        function drawBackground() {
+            var grd = ctx.createLinearGradient(canvas.width/2, canvas.height/2, canvas.width/2, canvas.height);
+            grd.addColorStop(0, '#4d0000');   // Places a color at the start
+            //grd.addColorStop(0.16, '#800000');
+            //grd.addColorStop(0.2, '#ff8080');
+            grd.addColorStop(0.6, '#ff4d4d')
+            grd.addColorStop(1, '#4d0000');  // Places a color at the end
+
+            // Fill with gradient
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
 
         // ball function
         function drawBall() {
@@ -133,7 +145,11 @@
                         bricks[c][r].y = brickY;
                         ctx.beginPath();
                         ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        ctx.fillStyle = bricks[c][r].brickColor;
+                        //ctx.fillStyle = bricks[c][r].brickColor;
+                        var grd = ctx.createLinearGradient(brickX, brickY, brickX + brickWidth, brickY + brickHeight);
+                        grd.addColorStop(0, bricks[c][r].brickColor);   // Places a color at the start
+                        grd.addColorStop(1, 'white');  // Places a color at the end
+                        ctx.fillStyle = grd;
                         ctx.fill();
                         ctx.closePath();
                         
@@ -222,6 +238,7 @@
         function draw() {
             // clears the canvas before each draw to remove trail
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground()
             // draw the ball
             drawBall();
             // draw bricks
@@ -261,7 +278,7 @@
                         document.location.reload();
                     }
                     else {
-                        alert("YOU LOST ONE LIFE")
+                        //alert("YOU LOST ONE LIFE")
                         x = canvas.width/2;
                         y = canvas.height-30;
                         dx = 2;

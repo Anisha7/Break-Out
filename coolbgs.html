@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Gamedev Canvas Workshop</title>
+        <style>
+            * { padding: 0; margin: 0; }
+            canvas { background: white; display: block; margin: 0 auto;}
+        </style>
+    </head>
+
+    <body>
+
+        <button onclick="next()"> NEXT</button>
+        <!-- renders game -->
+        <canvas id="myCanvas" width="480" height="320">
+            <!-- <p><iframe src="https://dabuttonfactory.com/button_Next.png?t=Next&f=Calibri-Bold&ts=25&tc=fff&tshs=1&tshc=000&w=250&h=50&c=0&bgt=unicolored&bgc=901c3b&be=1&bs=2&bc=000" width="100%" height="600"></iframe></p> -->
+        </canvas>
+        
+
+        <!-- controls game -->
+        <script>
+            // reference to canvas
+            var canvas = document.getElementById("myCanvas");
+            // 2D rendering context, to paint to canvas
+            var ctx = canvas.getContext("2d");
+            ctx.canvas.width  = window.innerWidth;
+            ctx.canvas.height = window.innerHeight;
+
+            index = 0;
+            function next() {
+                index += 1;
+                if (index > 3) {
+                    index = 0;
+                }
+            }
+            // Fill the background with vertical stripes.
+            // In side your drawBackground() function draw 10 rectangles.
+            // Use a loop to that counts to 10.
+            // Set the x position of each rectangle to canvas width / 10 * count
+            // Set the y of each rectangle to 0
+            // Set the width of each rectangle to 40
+            // Set the height of each rectangle to the height of the canvas
+            // Set the color to hsl(${360 / 10 * index}, 100%, 50%)
+            // Invent your color own scheme
+            function gradientBricks() {
+                let width = canvas.width/10;
+                let height = canvas.height;
+                brickX = 0;
+                brickY = 0;
+                color = ['#BD73EF', '#A75BBA', '#8455D6', '5E5ED6', '2D5EFF','black','black','black','black','black']
+                for (let i = 0; i < 10; i++) {
+                    ctx.beginPath();
+                    ctx.rect(brickX, brickY, width, height);
+                    var grd = ctx.createLinearGradient(brickX, brickY, brickX + brickWidth, brickY + brickHeight);
+                    grd.addColorStop(0, color[i]);   // Places a color at the start
+                    grd.addColorStop(1, color[10-i]);  // Places a color at the end
+                    ctx.fillStyle = grd;
+                    ctx.fill();
+                    ctx.closePath();
+
+                    brickX += width;
+                }
+
+            }
+
+            function bricks() {
+
+                let width = canvas.width/10;
+                let height = canvas.height;
+                brickX = 0;
+                brickY = 0;
+                
+                for (let i= 0; i <10; i++) {
+                    math = 360/10 * i
+                    color = `hsl(${math}, 100%, 50%)`;
+
+                    ctx.fillStyle = color;
+                    ctx.rect(brickX, brickY, width, height);
+                    
+                    console.log(brickX, brickY, width, height);
+                    ctx.fill();
+                    context.strokeStyle = "#0000ff";
+                    context.lineWidth   = 5;
+                    context.strokeRect(brickX, brickY, width, height);
+                    //ctx.closePath();
+                    brickX += 40;
+                }
+
+            }
+
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                bricks()
+            }
+
+            setInterval(draw, 10);
+        </script>
+    </body>
+
+</html>
