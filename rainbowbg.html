@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Gamedev Canvas Workshop</title>
+        <style>
+            * { padding: 0; margin: 0; }
+            canvas { background: white; display: block; margin: 0 auto;}
+        </style>
+    </head>
+
+    <body>
+        <!-- renders game -->
+        <canvas id="myCanvas" width="480" height="320">
+            <!-- <p><iframe src="https://dabuttonfactory.com/button_Next.png?t=Next&f=Calibri-Bold&ts=25&tc=fff&tshs=1&tshc=000&w=250&h=50&c=0&bgt=unicolored&bgc=901c3b&be=1&bs=2&bc=000" width="100%" height="600"></iframe></p> -->
+        </canvas>
+        
+
+        <!-- controls game -->
+        <script>
+            // reference to canvas
+            var canvas = document.getElementById("myCanvas");
+            // 2D rendering context, to paint to canvas
+            var ctx = canvas.getContext("2d");
+            ctx.canvas.width  = window.outerWidth;
+            ctx.canvas.height = window.outerHeight;
+
+            function drawCircle(x, y, r, color) {
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI*2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawRainbow() {
+                drawCircle(canvas.width/2, canvas.height, canvas.width/3, 'red')
+                drawCircle(canvas.width/2, canvas.height, 2*canvas.width/7, 'orange')
+                drawCircle(canvas.width/2, canvas.height, 3*canvas.width/13, 'yellow')
+                drawCircle(canvas.width/2, canvas.height, 4*canvas.width/22, 'green')
+                drawCircle(canvas.width/2, canvas.height, 5*canvas.width/37, '#00BFFF')
+                drawCircle(canvas.width/2, canvas.height, 6*canvas.width/63, 'indigo')
+                drawCircle(canvas.width/2, canvas.height, 7*canvas.width/111, 'violet')
+            }
+            
+            function stripes() {
+                
+                for (let i = 0; i < 10; i++) {
+                    const w = canvas.width / 10;
+                    const h = canvas.height;
+                    const x = w * i;
+                    const hue = (360 / 10) * i;
+                    const color = `hsl(${hue}, 100%, 50%)`;
+                
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, 0, x + w, h);
+                } 
+            }
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stripes()
+                drawRainbow()
+            }
+
+            setInterval(draw, 10);
+        </script>
+    </body>
+
+</html>
