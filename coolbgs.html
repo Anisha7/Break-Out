@@ -89,11 +89,37 @@
                 }
 
             }
+            // non buggy version of bricks() and why it works
+            function stripes() {
+                // Seems these must happen in this order:
+                // set fillStyle, fillRect. 
+                
+                // rect() doesn't work here since your drawing mulitple rectangles 
+                // that become part of the same path! The last call to fill()
+                // fills them all with the same color!
+                
+                // ctx.fillStyle = 'hsl(144, 100%, 50%)';
+                // ctx.fillRect(20, 40, 200, 230);
+                //      
+                // ctx.fillStyle = 'hsl(23, 100%, 50%)';
+                // ctx.fillRect(200, 140, 230, 200);
+                
+                for (let i = 0; i < 10; i++) {
+                    const w = canvas.width / 10;
+                    const h = canvas.height;
+                    const x = w * i;
+                    const hue = (360 / 10) * i;
+                    const color = `hsl(${hue}, 100%, 50%)`;
+                
+                    ctx.fillStyle = color;
+                    ctx.fillRect(x, 0, x + w, h);
+                } 
+            }
 
 
             function draw() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                bricks()
+                stripes()
             }
 
             setInterval(draw, 10);

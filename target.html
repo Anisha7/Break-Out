@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="utf-8" />
+        <title>Gamedev Canvas Workshop</title>
+        <style>
+            * { padding: 0; margin: 0; }
+            canvas { background: white; display: block; margin: 0 auto;}
+        </style>
+    </head>
+
+    <body>
+        <!-- renders game -->
+        <canvas id="myCanvas" width="480" height="320">
+            <!-- <p><iframe src="https://dabuttonfactory.com/button_Next.png?t=Next&f=Calibri-Bold&ts=25&tc=fff&tshs=1&tshc=000&w=250&h=50&c=0&bgt=unicolored&bgc=901c3b&be=1&bs=2&bc=000" width="100%" height="600"></iframe></p> -->
+        </canvas>
+        
+
+        <!-- controls game -->
+        <script>
+            // reference to canvas
+            var canvas = document.getElementById("myCanvas");
+            // 2D rendering context, to paint to canvas
+            var ctx = canvas.getContext("2d");
+            ctx.canvas.width  = window.outerWidth;
+            ctx.canvas.height = window.outerHeight;
+
+            function drawCircle(x, y, r, color) {
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI*2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawCircle(canvas.width/2, canvas.height/2, canvas.width/4, 'darkred')
+                drawCircle(canvas.width/2, canvas.height/2, canvas.width/6, 'white')
+                drawCircle(canvas.width/2, canvas.height/2, canvas.width/12, 'darkred')
+            }
+
+            setInterval(draw, 10);
+        </script>
+    </body>
+
+</html>
