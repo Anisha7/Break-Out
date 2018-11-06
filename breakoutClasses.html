@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <!-- renders game -->
+    <canvas id="myCanvas" width="480" height="320"></canvas>
+
+    <!-- controls game -->
+    <script>   
+        // reference to canvas
+        var canvas = document.getElementById("myCanvas");
+        // 2D rendering context, to paint to canvas
+        var ctx = canvas.getContext("2d");
+        ctx.canvas.width  = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+
+        // helpers
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+        }
+
+
+        class Ball {
+            constructor(x, y, r, dx, dy, color) {
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.r = r;
+                this.color = color;
+            }
+
+            drawBall() {
+                // draw the ball
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.fillStyle = ball.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            changeColor() {
+                // change color
+                let hue = getRandomInt(0, 360)
+                this.color = `hsl(${hue}, 100%, 50%)`
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
+            }
+        }
+
+        class Paddle {
+            constructor(width, height, x) {
+                this.width = width;
+                this.height = height;
+                this.x = x;
+            }
+            
+            drawPaddle() {
+                ctx.beginPath();
+                ctx.rect(paddleX, canvas.height-this.height, this.width, this.height);
+                ctx.fillStyle = "white";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+        
+        class Brick {
+            constructor() {
+                this.rowCount = 8;
+                this.columnCount = 15;
+                this.width = 85;
+                this.height = 40;
+                this.padding = 15;
+                this.offsetTop = 100;
+                this.offsetLeft = 30;
+                this.bricks = makeGrid();
+                    
+            }
+
+            // creating the brick grid
+            makeGrid() {
+                let hue = getRandomInt(0, 360)
+                let brickColor = `hsl(${hue}, 100%, 50%)`
+                for(let c=0; c<this.columnCount; c++) {
+                    this.bricks[c] = [];
+                    for(let r=0; r<brickRowCount; r++) {
+                        this.bricks[c][r] = { x: 0, y: 0, status: 1 , brickColor};
+                        //brickColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+                        let hue = getRandomInt(0, 360)
+                        brickColor = `hsl(${hue}, 100%, 50%)`
+                    }
+                }
+            }
+
+            drawBricks() {
+                for(let c=0; c<brickColumnCount; c++) {
+                    let off = 0;
+                    for(let r=0; r<brickRowCount; r++) {
+                        
+                        if(bricks[c][r].status == 1) {
+                            var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft + off;
+                            var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
+                            bricks[c][r].x = brickX;
+                            bricks[c][r].y = brickY;
+                            ctx.beginPath();
+                            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                            //ctx.fillStyle = bricks[c][r].brickColor;
+                            var grd = ctx.createLinearGradient(brickX, brickY, brickX + brickWidth, brickY + brickHeight);
+                            grd.addColorStop(0, bricks[c][r].brickColor);   // Places a color at the start
+                            grd.addColorStop(1, 'white');  // Places a color at the end
+                            ctx.fillStyle = grd;
+                            ctx.fill();
+                            ctx.closePath();
+                            
+                        }
+                        if (r%2 == 0) {
+                            off += 60;
+                        } else {
+                            off -= 60;
+                        }    
+                    }
+                    
+                }
+            }
+        }
+
+        class Player {
+            constructor(score, lives, rightPressed, leftPressed) {
+                this.score = score;
+                this.lives = lives;
+                this.rightPressed = rightPressed;
+                this.leftPressed = leftPressed;
+            }
+
+            keyDownHandler(e) {
+                if(e.keyCode == 39) {
+                    rightPressed = true;
+                }
+                else if(e.keyCode == 37) {
+                    leftPressed = true;
+                }
+            }
+
+            keyUpHandler(e) {
+                if(e.keyCode == 39) {
+                    rightPressed = false;
+                }
+                else if(e.keyCode == 37) {
+                    leftPressed = false;
+                }
+            }
+
+            mouseMoveHandler(e) {
+                let relativeX = e.clientX - canvas.offsetLeft;
+                if(relativeX > 0 && relativeX < canvas.width) {
+                    paddleX = relativeX - paddleWidth/2;
+                }
+            }
+        }
+
+
+        class Game {
+            constructor() {
+                this.ball = Ball(canvas.width/2, canvas.height-30, 20, 10, -10, "#0095DD");
+                this.paddle = Paddle(70, 10, (canvas.width-70)/2);
+                this.brick = Brick();
+                brick.makeGrid();
+                this.player = Player(0, 3, false, false);
+            }
+
+            drawScore() {
+                ctx.font = "30px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("Score: "+score, 90, 50);
+            }
+
+            drawLives() {
+                ctx.font = "30px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("Lives: "+lives, canvas.width-205, 50);
+            }
+
+            drawInstructions() {
+                ctx.font = "20px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("The red ball can take away your life.", canvas.width/2 -120, 50);
+            }
+
+            drawBackground() {
+                var grd = ctx.createLinearGradient(canvas.width/2, canvas.height/2, canvas.width/2, canvas.height);
+                grd.addColorStop(0, '#4d0000');   // Places a color at the start
+                //grd.addColorStop(0.16, '#800000');
+                //grd.addColorStop(0.2, '#ff8080');
+                grd.addColorStop(0.6, '#ff4d4d')
+                grd.addColorStop(1, '#4d0000');  // Places a color at the end
+
+                // Fill with gradient
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            collisionDetection() {
+                for(let c=0; c<(this.brick).columnCount; c++) {
+                    for(let r=0; r<(this.brick).rowCount; r++) {
+                        let b = (this.brick).bricks[c][r];
+                        if(b.status == 1) {
+                            if((this.ball).x > b.x && (this.ball).x < b.x+(this.brick).width && (this.ball).y > b.y && (this.ball).y < b.y+(this.brick).height) {
+                                (this.ball).dy = -((this.ball).dy);
+                                b.status = 0;
+                                (this.player).score++;
+                                // if all bricks are destroyed
+                                if((this.player).score == (this.brick).rowCount*(this.brick).columnCount) {
+                                    alert("YOU WIN, CONGRATULATIONS!");
+                                    document.location.reload();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            addListeners() {
+                document.addEventListener("keydown", (this.player).keyDownHandler, false);
+                document.addEventListener("keyup", (this.player).keyUpHandler, false);
+                document.addEventListener("mousemove", (this.player).mouseMoveHandler, false);
+            }
+
+            draw() {
+                this.drawBackground();
+                this.ball.drawBall();
+                this.brick.drawBricks();
+                this.paddle.drawPaddle();
+                this.drawScore();
+                this.drawLives();
+                this.drawInstructions();
+                this.collisionDetection();
+            }
+
+            update() {
+                game.ball.update();
+
+                // change direction if ball hits the wall
+                // subtracting radius to make sure it doesn't partially sink in the wall
+                if((this.ball).x +(this.ball).dx > canvas.width-(this.ball).r || (this.ball).x + (this.ball).dx < (this.ball).r) {
+                    (this.ball).dx = -((this.ball).dx);
+                }
+                // trigger game over if bottom wall is hit
+                if((this.ball).y + (this.ball).dy < (this.ball).r) {
+                    (this.ball).dy = -((this.ball).dy);
+                } else if((this.ball).y + (this.ball).dy > canvas.height-(this.ball).r) {
+                    // check for paddle collision
+                    if((this.ball).x > (this.paddle).x && (this.ball).x < (this.paddle).x + (this.paddle).width) {
+                        (this.ball).dy = -((this.ball).dy);
+                    }
+                    else {
+                        (this.player).lives--;
+                        if(!(this.player).lives) {
+                            alert("GAME OVER");
+                            document.location.reload();
+                        }
+                        else {
+                            //alert("YOU LOST ONE LIFE")
+                            (this.ball).x = canvas.width/2;
+                            (this.ball).y = canvas.height-30;
+                            (this.ball).dx = 2;
+                            (this.ball).dy = -2;
+                            (this.paddle).x = (canvas.width-(this.paddle).width)/2;
+                        }
+                    }
+                }
+            }
+        }
+
+        var game = Game()
+
+        function draw() {
+            game.draw();
+            game.update();
+        }
+        
+        game.addListeners();
+        // will execute draw every 10 milliseconds
+        setInterval(draw, speed);
+        // will execute color change every 1000 milliseconds
+        setInterval(changeColor, 1000);
+
+
+    </script>
+
+</body>
+</html>
