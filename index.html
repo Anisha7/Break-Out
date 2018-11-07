@@ -5,7 +5,7 @@
     <title>Gamedev Canvas Workshop</title>
     <style>
     	* { padding: 0; margin: 0; }
-    	canvas { background: black; display: block; margin: 0 auto;}
+    	canvas { background: #eee; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -14,7 +14,7 @@
     <canvas id="myCanvas" width="480" height="320"></canvas>
 
     <!-- controls game -->
-    <script>
+    <script>   
         // reference to canvas
         var canvas = document.getElementById("myCanvas");
         // 2D rendering context, to paint to canvas
@@ -28,330 +28,326 @@
             max = Math.floor(max);
             return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
         }
-        
-        // defining a drawing loop
-        // loop functions over using JavaScript timing functions : setInterval() or requestAnimationFrame()
-        
-        // ball variables
-        // center position for ball
-        var x = canvas.width/2;
-        var y = canvas.height-30;
-        // change difference for position
-        var dx = 10;
-        var dy = -10;
-        // radius 
-        var ballRadius = 20;
-        // color
-        var ballColor = "#0095DD";
-
-        // paddle variables
-        var paddleHeight = 10;
-        var paddleWidth = 70;
-        var paddleX = (canvas.width-paddleWidth)/2;
-
-        // user controls
-        var rightPressed = false;
-        var leftPressed = false;
-
-        // brick variables
-        var brickRowCount = 8;
-        var brickColumnCount = 15;
-        var brickWidth = 85;
-        var brickHeight = 40;
-        var brickPadding = 15;
-        var brickOffsetTop = 100;
-        var brickOffsetLeft = 30;
 
 
-        // creating the brick grid
-        var bricks = [];
-        let hue = getRandomInt(0, 360)
-        let brickColor = `hsl(${hue}, 100%, 50%)`
-        for(let c=0; c<brickColumnCount; c++) {
-            bricks[c] = [];
-            for(let r=0; r<brickRowCount; r++) {
-                bricks[c][r] = { x: 0, y: 0, status: 1 , brickColor};
-                //brickColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+        class Ball {
+            constructor(x, y, r, dx, dy, color) {
+                this.x = x;
+                this.y = y;
+                this.dx = dx;
+                this.dy = dy;
+                this.r = r;
+                this.color = color;
+            }
+
+            drawBall() {
+                // draw the ball
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            changeColor() {
+                // change color
                 let hue = getRandomInt(0, 360)
-                brickColor = `hsl(${hue}, 100%, 50%)`
+                this.color = `hsl(${hue}, 100%, 50%)`
+            }
+
+            update() {
+                this.x += this.dx;
+                this.y += this.dy;
             }
         }
 
-        // scoring
-        var score = 0;
-        var lives = 3;
-
-        // speed
-        var speed = 7;
-
-        // draw background function
-        function drawBackground() {
-            var grd = ctx.createLinearGradient(canvas.width/2, canvas.height/2, canvas.width/2, canvas.height);
-            grd.addColorStop(0, '#4d0000');   // Places a color at the start
-            //grd.addColorStop(0.16, '#800000');
-            //grd.addColorStop(0.2, '#ff8080');
-            grd.addColorStop(0.6, '#ff4d4d')
-            grd.addColorStop(1, '#4d0000');  // Places a color at the end
-
-            // Fill with gradient
-            ctx.fillStyle = grd;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // ball function
-        function drawBall() {
-            // draw the ball
-            ctx.beginPath();
-            ctx.arc(x, y, ballRadius, 0, Math.PI*2);
-            ctx.fillStyle = 'white';
-            ctx.fill();
-            ctx.closePath();
-        }
-
-        // second ball (enemy)
-        var x_e = 40;
-        var y_e = 40;
-        var dx_e = 2;
-        var dy_e = -2;
-        function drawBall2() {
-            // draw the ball
-            ctx.beginPath();
-            ctx.arc(x_e, y_e, ballRadius, 0, Math.PI*2);
-            ctx.fillStyle = "red";
-            ctx.fill();
-            ctx.closePath();
+        class Paddle {
+            constructor(width, height, x) {
+                this.width = width;
+                this.height = height;
+                this.x = x;
+            }
+            
+            drawPaddle() {
+                ctx.beginPath();
+                ctx.rect(this.x, canvas.height-this.height, this.width, this.height);
+                ctx.fillStyle = "white";
+                ctx.fill();
+                ctx.closePath();
+            }
         }
         
-        // paddle function
-        function drawPaddle() {
-            ctx.beginPath();
-            ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
-            ctx.fillStyle = "white";
-            ctx.fill();
-            ctx.closePath();
+        class Brick {
+            constructor() {
+                this.rowCount = 8;
+                this.columnCount = 15;
+                this.width = 85;
+                this.height = 40;
+                this.padding = 15;
+                this.offsetTop = 100;
+                this.offsetLeft = 30;
+                this.bricks = [];
+                    
+            }
+
+            // creating the brick grid
+            makeGrid() {
+                let hue = getRandomInt(0, 360)
+                let brickColor = `hsl(${hue}, 100%, 50%)`
+                for(let c=0; c<this.columnCount; c++) {
+                    this.bricks[c] = [];
+                    for(let r=0; r<this.rowCount; r++) {
+                        this.bricks[c][r] = { x: 0, y: 0, status: 1 , brickColor};
+                        //brickColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
+                        let hue = getRandomInt(0, 360)
+                        brickColor = `hsl(${hue}, 100%, 50%)`
+                    }
+                }
+            }
+
+            drawBricks() {
+                for(let c=0; c<this.columnCount; c++) {
+                    let off = 0;
+                    for(let r=0; r<this.rowCount; r++) {
+                        
+                        if(this.bricks[c][r].status == 1) {
+                            var brickX = (c*(this.width+this.padding))+this.offsetLeft + off;
+                            var brickY = (r*(this.height+this.padding))+this.offsetTop;
+                            this.bricks[c][r].x = brickX;
+                            this.bricks[c][r].y = brickY;
+                            ctx.beginPath();
+                            ctx.rect(brickX, brickY, this.width, this.height);
+                            //ctx.fillStyle = bricks[c][r].brickColor;
+                            var grd = ctx.createLinearGradient(brickX, brickY, brickX + this.width, brickY + this.height);
+                            grd.addColorStop(0, this.bricks[c][r].brickColor);   // Places a color at the start
+                            grd.addColorStop(1, 'white');  // Places a color at the end
+                            ctx.fillStyle = grd;
+                            ctx.fill();
+                            ctx.closePath();
+                            
+                        }
+                        if (r%2 == 0) {
+                            off += 60;
+                        } else {
+                            off -= 60;
+                        }    
+                    }
+                    
+                }
+            }
         }
 
-        // draw bricks
-        function drawBricks() {
-            
-            for(let c=0; c<brickColumnCount; c++) {
-                let off = 0;
-                for(let r=0; r<brickRowCount; r++) {
-                    
-                    if(bricks[c][r].status == 1) {
-                        var brickX = (c*(brickWidth+brickPadding))+brickOffsetLeft + off;
-                        var brickY = (r*(brickHeight+brickPadding))+brickOffsetTop;
-                        bricks[c][r].x = brickX;
-                        bricks[c][r].y = brickY;
-                        ctx.beginPath();
-                        ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                        //ctx.fillStyle = bricks[c][r].brickColor;
-                        var grd = ctx.createLinearGradient(brickX, brickY, brickX + brickWidth, brickY + brickHeight);
-                        grd.addColorStop(0, bricks[c][r].brickColor);   // Places a color at the start
-                        grd.addColorStop(1, 'white');  // Places a color at the end
-                        ctx.fillStyle = grd;
-                        ctx.fill();
-                        ctx.closePath();
-                        
-                    }
-                    if (r%2 == 0) {
-                        off += 60;
-                    } else {
-                        off -= 60;
-                    }    
-                }
+        class Player {
+            constructor(score, lives, rightPressed, leftPressed) {
+                this.score = score;
+                this.lives = lives;
+                this.rightPressed = rightPressed;
+                this.leftPressed = leftPressed;
+                document.addEventListener("keydown", this.onKey.bind(this), false);
+                document.addEventListener("keyup", (e) => {
+                    this.onKey(e);
+                }, false);
                 
             }
+
+            onKey(e) {
+                //this.rightPressed = true
+                console.log("key down", this)
+                if(e.keyCode == 39) {
+                    this.rightPressed = true;
+                    this.leftPressed = false;
+                }
+                else if(e.keyCode == 37) {
+                    this.leftPressed = true;
+                    this.rightPressed = false;
+                }
+            }
+
+            
         }
 
-        function changeColor() {
-            // change color
-            //ballColor = "#" + (Math.random()*0xFFFFFF<<0).toString(16);
-            let hue = getRandomInt(0, 360)
-            ballColor = `hsl(${hue}, 100%, 50%)`
-        }
 
-        // user functions
-        function keyDownHandler(e) {
-            if(e.keyCode == 39) {
-                rightPressed = true;
+        class Game {
+            constructor() {
+                this.ball = new Ball(canvas.width/2, canvas.height-30, 20, 10, -10, "white");
+                this.paddle = new Paddle(70, 10, (canvas.width-70)/2);
+                this.brick = new Brick();
+                this.brick.makeGrid();
+                this.player = new Player(0, 3, false, false);
+                // document.addEventListener("mousemove", this.onMouseMove.bind(this), false);
             }
-            else if(e.keyCode == 37) {
-                leftPressed = true;
-            }
-        }
 
-        function keyUpHandler(e) {
-            if(e.keyCode == 39) {
-                rightPressed = false;
-            }
-            else if(e.keyCode == 37) {
-                leftPressed = false;
-            }
-        }
+            // onMouseMove(e) {
+            //     console.log("mouse")
+            //     let relativeX = e.clientX - canvas.offsetLeft;
+            //     if(relativeX > 0 && relativeX < canvas.width) {
+            //         paddleWidth = this.paddle.width
+            //         paddleX = relativeX - paddleWidth/2;
+            //         this.paddle.x = paddleX
+            //     }
+            // }
 
-        function mouseMoveHandler(e) {
-            let relativeX = e.clientX - canvas.offsetLeft;
-            if(relativeX > 0 && relativeX < canvas.width) {
-                paddleX = relativeX - paddleWidth/2;
+            drawScore() {
+                ctx.font = "30px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("Score: "+this.player.score, 90, 50);
             }
-        }
 
-        function collisionDetection() {
-            for(let c=0; c<brickColumnCount; c++) {
-                for(let r=0; r<brickRowCount; r++) {
-                    let b = bricks[c][r];
-                    if(b.status == 1) {
-                        if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
-                            dy = -dy;
-                            b.status = 0;
-                            score++;
-                            // if all bricks are destroyed
-                            if(score == brickRowCount*brickColumnCount) {
-                                alert("YOU WIN, CONGRATULATIONS!");
-                                document.location.reload();
+            drawLives() {
+                ctx.font = "30px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("Lives: "+this.player.lives, canvas.width-205, 50);
+            }
+
+            drawInstructions() {
+                ctx.font = "20px Arial";
+                ctx.fillStyle = "white";
+                ctx.fillText("Use left and right arrow keys to move", canvas.width/2 -120, 50);
+            }
+
+            drawBackground() {
+                var grd = ctx.createLinearGradient(canvas.width/2, canvas.height/2, canvas.width/2, canvas.height);
+                grd.addColorStop(0, '#4d0000');   // Places a color at the start
+                //grd.addColorStop(0.16, '#800000');
+                //grd.addColorStop(0.2, '#ff8080');
+                grd.addColorStop(0.6, '#ff4d4d')
+                grd.addColorStop(1, '#4d0000');  // Places a color at the end
+
+                // Fill with gradient
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            collisionDetection() {
+                for(let c=0; c<(this.brick).columnCount; c++) {
+                    for(let r=0; r<(this.brick).rowCount; r++) {
+                        let b = (this.brick).bricks[c][r];
+                        if(b.status == 1) {
+                            if((this.ball).x > b.x && (this.ball).x < b.x+(this.brick).width && (this.ball).y > b.y && (this.ball).y < b.y+(this.brick).height) {
+                                (this.ball).dy = -((this.ball).dy);
+                                b.status = 0;
+                                (this.player).score++;
+                                // if all bricks are destroyed
+                                if((this.player).score == (this.brick).rowCount*(this.brick).columnCount) {
+                                    alert("YOU WIN, CONGRATULATIONS!");
+                                    document.location.reload();
+                                }
                             }
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                this.drawBackground();
+                this.ball.drawBall();
+                this.brick.drawBricks();
+                this.paddle.drawPaddle();
+                this.drawScore();
+                this.drawLives();
+                this.drawInstructions();
+                this.collisionDetection();
+            }
+
+            update() {
+                game.ball.update();
+
+                // change direction if ball hits the wall
+                // subtracting radius to make sure it doesn't partially sink in the wall
+                if((this.ball).x +(this.ball).dx > canvas.width-(this.ball).r || (this.ball).x + (this.ball).dx < (this.ball).r) {
+                    (this.ball).dx = -((this.ball).dx);
+                }
+                // trigger game over if bottom wall is hit
+                if((this.ball).y + (this.ball).dy < (this.ball).r) {
+                    (this.ball).dy = -((this.ball).dy);
+                } else if((this.ball).y + (this.ball).dy > canvas.height-(this.ball).r) {
+                    // check for paddle collision
+                    if((this.ball).x > (this.paddle).x && (this.ball).x < (this.paddle).x + (this.paddle).width) {
+                        (this.ball).dy = -((this.ball).dy);
+                    }
+                    else {
+                        (this.player).lives--;
+                        if(!(this.player).lives) {
+                            alert("GAME OVER");
+                            document.location.reload();
+                        }
+                        else {
+                            //alert("YOU LOST ONE LIFE")
+                            (this.ball).x = canvas.width/2;
+                            (this.ball).y = canvas.height-30;
+                            (this.ball).dx = 2;
+                            (this.ball).dy = -2;
+                            (this.paddle).x = (canvas.width-(this.paddle).width)/2;
                         }
                     }
                 }
             }
         }
 
-        function drawScore() {
-            ctx.font = "30px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText("Score: "+score, 90, 50);
-        }
-
-        function drawLives() {
-            ctx.font = "30px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText("Lives: "+lives, canvas.width-205, 50);
-        }
-
-        function drawInstructions() {
-            ctx.font = "20px Arial";
-            ctx.fillStyle = "white";
-            ctx.fillText("The red ball can take away your life.", canvas.width/2 -120, 50);
-        }
+        let game = new Game()
         
+        // function keyDownHandler(e) {
+        //     if(e.keyCode == 39) {
+        //         game.player.rightPressed = true;
+        //     }
+        //     else if(e.keyCode == 37) {
+        //         game.player.leftPressed = true;
+        //     }
+        // }
+
+        // function keyUpHandler(e) {
+        //     if(e.keyCode == 39) {
+        //         game.player.rightPressed = false;
+        //     }
+        //     else if(e.keyCode == 37) {
+        //         game.player.leftPressed = false;
+        //     }
+        // }
+
+        // function mouseMoveHandler(e) {
+        //     let relativeX = e.clientX - canvas.offsetLeft;
+        //     if(relativeX > 0 && relativeX < canvas.width) {
+        //         paddleWidth = game.paddle.width
+        //         paddleX = relativeX - paddleWidth/2;
+        //         game.paddle.x = paddleX
+        //     }
+        // }
+
         function draw() {
-            // clears the canvas before each draw to remove trail
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawBackground()
-            // draw the ball
-            drawBall();
-            // draw bricks
-            drawBricks();
-            // draw the paddle
-            drawPaddle();
-            // draw enemy ball
-            drawBall2();
-            // scoring
-            drawScore();
-            // lives
-            drawLives();
-            drawInstructions()
-            // paddle-brick collisions
-            collisionDetection();
-            // update position
-            x += dx;
-            y += dy;
-            
-            // change direction if ball hits the wall
-            // subtracting radius to make sure it doesn't partially sink in the wall
-            if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
-                dx = -dx;
-            }
-            // trigger game over if bottom wall is hit
-            if(y + dy < ballRadius) {
-                dy = -dy;
-            } else if(y + dy > canvas.height-ballRadius) {
-                // check for paddle collision
-                if(x > paddleX && x < paddleX + paddleWidth) {
-                    dy = -dy;
-                }
-                else {
-                    lives--;
-                    if(!lives) {
-                        alert("GAME OVER");
-                        document.location.reload();
-                    }
-                    else {
-                        //alert("YOU LOST ONE LIFE")
-                        x = canvas.width/2;
-                        y = canvas.height-30;
-                        dx = 2;
-                        dy = -2;
-                        paddleX = (canvas.width-paddleWidth)/2;
-                    }
-                }
-            }
-            
-            // enemy ball
-            x_e += dx_e;
-            y_e += dy_e;
-
-            if(x_e + dx > canvas.width-ballRadius || x_e + dx < ballRadius) {
-                dx_e = -dx_e;
-            }
-            if(y_e + dy > canvas.height-ballRadius || y_e + dy < ballRadius) {
-                dy_e = -dy_e;
-            }
-
-            // check collision between enemy ball and player ball
-            if (x_e >= x-ballRadius && x_e <= x+ballRadius) {
-                if (y_e >= y-ballRadius && y_e <= y+ballRadius) {
-                    lives--;
-                    if(!lives) {
-                        alert("GAME OVER");
-                        document.location.reload();
-                    }
-                    else {
-                        x = canvas.width/2;
-                        y = canvas.height-30;
-                        dx = 2;
-                        dy = -2;
-                        paddleX = (canvas.width-paddleWidth)/2;
-                    }
-                }
-            }
-
-            // check for paddle collision
-            if(y_e + dy_e > canvas.height-ballRadius) {
-                if(x_e > paddleX && x_e < paddleX + paddleWidth) {
-                        dy_e = -dy_e;
-                    }
-            }
+            game.draw();
+            game.update();
 
             // paddle controls
-            if(rightPressed && paddleX < canvas.width-paddleWidth) {
-                paddleX += 7;
+            if(game.player.rightPressed && game.paddle.x < canvas.width-game.paddle.width) {
+                game.paddle.x += 5;
             }
-            else if(leftPressed && paddleX > 0) {
-                paddleX -= 7;
+            else if(game.player.leftPressed && game.paddle.x > 0) {
+                game.paddle.x -= 5;
             }
             
             if (score > 30) {
-                paddleWidth = 80;
-                dx = 30;
-                dy = 30;
+                game.paddle.width -= 10;
+                game.ball.dx = 30;
+                game.ball.dy = -30;
             }
 
             if (score > 60) {
-                paddleWidth = 60;
-                dx = 50;
-                dy = 50;
+                game.paddle.width -= 10;
+                game.ball.dx = 50;
+                game.ball.dy = -50;
             }
         }
+        
         // adding listeners to call user functions when user interacts
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
-        document.addEventListener("mousemove", mouseMoveHandler, false);
+        // document.addEventListener("keydown", keyDownHandler, false);
+        // document.addEventListener("keyup", keyUpHandler, false);
+        // document.addEventListener("mousemove", mouseMoveHandler, false);
+        
         // will execute draw every 10 milliseconds
-        setInterval(draw, speed);
+        setInterval(draw, 10);
         // will execute color change every 1000 milliseconds
-        setInterval(changeColor, 1000);
+        setInterval(game.ball.changeColor(), 1000);
+
 
     </script>
 
