@@ -143,7 +143,27 @@
                 this.lives = lives;
                 this.rightPressed = rightPressed;
                 this.leftPressed = leftPressed;
+                document.addEventListener("keydown", this.onKey.bind(this), false);
+                document.addEventListener("keyup", (e) => {
+                    this.onKey(e);
+                }, false);
+                
             }
+
+            onKey(e) {
+                //this.rightPressed = true
+                console.log("key down", this)
+                if(e.keyCode == 39) {
+                    this.rightPressed = true;
+                    this.leftPressed = false;
+                }
+                else if(e.keyCode == 37) {
+                    this.leftPressed = true;
+                    this.rightPressed = false;
+                }
+            }
+
+            
         }
 
 
@@ -154,7 +174,18 @@
                 this.brick = new Brick();
                 this.brick.makeGrid();
                 this.player = new Player(0, 3, false, false);
+                // document.addEventListener("mousemove", this.onMouseMove.bind(this), false);
             }
+
+            // onMouseMove(e) {
+            //     console.log("mouse")
+            //     let relativeX = e.clientX - canvas.offsetLeft;
+            //     if(relativeX > 0 && relativeX < canvas.width) {
+            //         paddleWidth = this.paddle.width
+            //         paddleX = relativeX - paddleWidth/2;
+            //         this.paddle.x = paddleX
+            //     }
+            // }
 
             drawScore() {
                 ctx.font = "30px Arial";
@@ -171,7 +202,7 @@
             drawInstructions() {
                 ctx.font = "20px Arial";
                 ctx.fillStyle = "white";
-                ctx.fillText("The red ball can take away your life.", canvas.width/2 -120, 50);
+                ctx.fillText("Use left and right arrow keys to move", canvas.width/2 -120, 50);
             }
 
             drawBackground() {
@@ -255,32 +286,32 @@
 
         let game = new Game()
         
-        function keyDownHandler(e) {
-            if(e.keyCode == 39) {
-                game.player.rightPressed = true;
-            }
-            else if(e.keyCode == 37) {
-                game.player.leftPressed = true;
-            }
-        }
+        // function keyDownHandler(e) {
+        //     if(e.keyCode == 39) {
+        //         game.player.rightPressed = true;
+        //     }
+        //     else if(e.keyCode == 37) {
+        //         game.player.leftPressed = true;
+        //     }
+        // }
 
-        function keyUpHandler(e) {
-            if(e.keyCode == 39) {
-                game.player.rightPressed = false;
-            }
-            else if(e.keyCode == 37) {
-                game.player.leftPressed = false;
-            }
-        }
+        // function keyUpHandler(e) {
+        //     if(e.keyCode == 39) {
+        //         game.player.rightPressed = false;
+        //     }
+        //     else if(e.keyCode == 37) {
+        //         game.player.leftPressed = false;
+        //     }
+        // }
 
-        function mouseMoveHandler(e) {
-            let relativeX = e.clientX - canvas.offsetLeft;
-            if(relativeX > 0 && relativeX < canvas.width) {
-                paddleWidth = game.paddle.width
-                paddleX = relativeX - paddleWidth/2;
-                game.paddle.x = paddleX
-            }
-        }
+        // function mouseMoveHandler(e) {
+        //     let relativeX = e.clientX - canvas.offsetLeft;
+        //     if(relativeX > 0 && relativeX < canvas.width) {
+        //         paddleWidth = game.paddle.width
+        //         paddleX = relativeX - paddleWidth/2;
+        //         game.paddle.x = paddleX
+        //     }
+        // }
 
         function draw() {
             game.draw();
@@ -288,10 +319,10 @@
 
             // paddle controls
             if(game.player.rightPressed && game.paddle.x < canvas.width-game.paddle.width) {
-                game.paddle.x += 7;
+                game.paddle.x += 5;
             }
             else if(game.player.leftPressed && game.paddle.x > 0) {
-                game.paddle.x -= 7;
+                game.paddle.x -= 5;
             }
             
             if (score > 30) {
@@ -308,9 +339,9 @@
         }
         
         // adding listeners to call user functions when user interacts
-        document.addEventListener("keydown", keyDownHandler, false);
-        document.addEventListener("keyup", keyUpHandler, false);
-        document.addEventListener("mousemove", mouseMoveHandler, false);
+        // document.addEventListener("keydown", keyDownHandler, false);
+        // document.addEventListener("keyup", keyUpHandler, false);
+        // document.addEventListener("mousemove", mouseMoveHandler, false);
         
         // will execute draw every 10 milliseconds
         setInterval(draw, 10);
